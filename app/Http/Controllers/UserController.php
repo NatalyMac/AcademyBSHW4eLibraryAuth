@@ -14,7 +14,11 @@ use App\User;
 class UserController extends Controller
 {
     protected $users;
-    
+
+    /**
+     * UserController constructor.
+     * @param UserRepository $users
+     */
     public function __construct(UserRepository $users)
     {
         $this->middleware('auth');
@@ -22,12 +26,19 @@ class UserController extends Controller
 
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     */
     public function index(Request $request)
     {
         $users = $this->users->forUser($request->user())->paginate(10);
         return view('user/index',['users'=>$users]);
     }
 
+    /**
+     * @return mixed
+     */
     public function create()
     {
         $this->authorize('create');
@@ -35,8 +46,14 @@ class UserController extends Controller
         return view('user/create');
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     */
     public function store(Request $request)
     {
+        $this->authorize('store');
+
         $rules = ['firstname' => 'required|alpha',
                   'lastname'  => 'required|alpha',
                   'email'     => 'required|email|unique:users',
@@ -52,8 +69,6 @@ class UserController extends Controller
         $user->password =  bcrypt($request->password);
         $user->role = $request->role;
 
-        $this->authorize('store');
-
         $user->save();
         
         Session::flash('message', "Successfully created user ID".$user->id." ".$user->firstname);
@@ -61,53 +76,81 @@ class UserController extends Controller
             return (Redirect::to('users'));
     }
 
+    /**
+     * @param $id
+     * @param Request $request
+     * @return mixed
+     */
     public function show($id, Request $request)
     {
         $user = User::findOrFail($id);
 
         if ($request->user()->id == $user->id or $request->user()->role == 'admin')
+            
             return view('user/show',['user'=>$user]);
-        else  return Redirect::to('users')->with('message','You do not have permission');
+        else
+            abort(403);
     }
 
-    public function edit($id)
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function edit($id, Request $request)
     {
+      //  $this->authorize('edit');
+
         $user = User::findOrFail($id);
 
-        $this->authorize('edit');
+        if ($request->user()->id == $user->id or $request->user()->role == 'admin')
 
-        return view('user/edit',['user'=>$user]);
+            return view('user/edit',['user'=>$user]);
+        else
+            abort(403);
+
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return mixed
+     */
     public function update(Request $request, $id)
     {
-        $rules = ['firstname' => 'required|alpha',
+        $rules = ['firstname'  => 'required|alpha',
                   'lastname'  => 'required|alpha',
-                  //'email'     => 'required|email|unique:users',
-                  'role'      => 'required'];
+                   'role'     => 'required'];
 
-        $this->validate($request, $rules);
 
         $user = User::findOrFail($id);
-        $user->firstname = $request->firstname;
-        $user->lastname = $request->lastname;
-        $user->email = $request->email;
-        $user->role = $request->role;
 
-        $this->authorize('update');
+        if ($request->user()->id == $user->id or $request->user()->role == 'admin') {
 
-        $user->save();
+            $this->validate($request, $rules);
 
-        Session::flash('message', "Successfully updated user ID".$user->id." ".$user->firstname);
+            $user->firstname = $request->firstname;
+            $user->lastname = $request->lastname;
+            $user->email = $request->email;
+            $user->role = $request->role;
 
-        return (Redirect::to('users'));
+            $user->save();
+
+            Session::flash('message', "Successfully updated user ID" . $user->id . " "
+                                                                   . $user->firstname);
+
+            return (Redirect::to('users'));
+        } else  abort(403);
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
-
         $this->authorize('destroy');
+
+        $user = User::findOrFail($id);
 
         $user->delete();
 

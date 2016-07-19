@@ -15,11 +15,18 @@ class LendController extends Controller
 {
 
 
+    /**
+     * LendController constructor.
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
+    /**
+     * @param $book_id
+     * @return mixed
+     */
     public function create($book_id)
     {
         $this->authorize('create');
@@ -29,6 +36,10 @@ class LendController extends Controller
         return view('lend/create', ['book'=>$book, 'readers'=>$readers]);
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     */
     public function store(Request $request)
     {
         $this->authorize('store');
@@ -60,7 +71,11 @@ class LendController extends Controller
 
     }
 
-    
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
     public function update(Request $request)
     {
         $this->authorize('update');

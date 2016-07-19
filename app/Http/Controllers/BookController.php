@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
-use Gate;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -18,12 +17,20 @@ class BookController extends Controller
 {
     protected $books;
 
+    /**
+     * BookController constructor.
+     * @param BookRepository $books
+     */
     public function __construct(BookRepository $books)
     {
         $this->middleware('auth');
         $this->books = $books;
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     */
     public function index(Request $request)
     {
         $books = $this->books->forUser($request->user())->paginate(10);
@@ -31,12 +38,19 @@ class BookController extends Controller
         return view('book/index',['books'=>$books]);
     }
 
+    /**
+     * @return mixed
+     */
     public function create()
     {
         $this->authorize('create');
         return view('book/create');
     }
 
+    /**
+     * @param Request $request
+     * @return mixed
+     */
     public function store(Request $request)
     {
         $this->authorize('store');
@@ -61,6 +75,10 @@ class BookController extends Controller
         return (Redirect::to('books'));
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function show($id)
     {
         $user = null;
@@ -75,14 +93,24 @@ class BookController extends Controller
         return view('book/show',['book'=>$book, 'user'=>$user ]);
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function edit($id)
     {
-        $book = Book::findOrFail($id);
         $this->authorize('edit');
+
+        $book = Book::findOrFail($id);
         
         return view('book/edit',['book'=>$book]);
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return mixed
+     */
     public function update(Request $request, $id)
     {
         $this->authorize('update');
@@ -107,6 +135,10 @@ class BookController extends Controller
         return (Redirect::to('books'));
     }
 
+    /**
+     * @param $id
+     * @return mixed
+     */
     public function destroy($id)
     {
         $this->authorize('destroy');

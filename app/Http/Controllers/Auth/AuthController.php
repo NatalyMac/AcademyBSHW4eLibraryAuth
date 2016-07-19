@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use Validator;
+use Socialite;
+use Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
@@ -71,4 +73,33 @@ class AuthController extends Controller
             'password' => bcrypt($data['password']),
         ]);
     }
+
+    public function redirectToProvider($provider)
+    {
+        return Socialite::driver($provider)->redirect();
+    }
+
+    /**
+     * Obtain the user information from GitHub.
+     *
+     * @return Response
+     */
+    public function handleProviderCallback($provider)
+    {
+        $socialUser = Socialite::driver($provider)->user();
+        $user = User::where(['email'=>$socialUser->email])->first();
+        if(is_null($user))
+        {
+            $user = User::create([
+                'firstname' =>  $socialUser->name,
+                'lastname'=> '',
+                'email' => $socialUser->email,
+            ]);
+        }
+        Auth::login($user);
+
+            return redirect($this->redirectTo);
+
+    }
+
 }

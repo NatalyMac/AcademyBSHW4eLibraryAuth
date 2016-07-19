@@ -22,17 +22,16 @@ class UserController extends Controller
 
     }
 
-
     public function index(Request $request)
     {
-        //$users = User::paginate(10);
-       // $users = User::bookCount()->paginate(10);
         $users = $this->users->forUser($request->user())->paginate(10);
         return view('user/index',['users'=>$users]);
     }
 
     public function create()
     {
+        $this->authorize('create');
+
         return view('user/create');
     }
 
@@ -53,6 +52,8 @@ class UserController extends Controller
         $user->password =  bcrypt($request->password);
         $user->role = $request->role;
 
+        $this->authorize('store');
+
         $user->save();
         
         Session::flash('message', "Successfully created user ID".$user->id." ".$user->firstname);
@@ -60,16 +61,20 @@ class UserController extends Controller
             return (Redirect::to('users'));
     }
 
-    public function show($id)
+    public function show($id, Request $request)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
 
-        return view('user/show',['user'=>$user]);
+        if ($request->user()->id == $user->id or $request->user()->role == 'admin')
+            return view('user/show',['user'=>$user]);
+        else  return Redirect::to('users')->with('message','You do not have permission');
     }
 
     public function edit($id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
+
+        $this->authorize('edit');
 
         return view('user/edit',['user'=>$user]);
     }
@@ -78,16 +83,18 @@ class UserController extends Controller
     {
         $rules = ['firstname' => 'required|alpha',
                   'lastname'  => 'required|alpha',
-                  'email'     => 'required|email|unique:users',
+                  //'email'     => 'required|email|unique:users',
                   'role'      => 'required'];
 
         $this->validate($request, $rules);
 
-        $user = User::find($id);
+        $user = User::findOrFail($id);
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
         $user->email = $request->email;
         $user->role = $request->role;
+
+        $this->authorize('update');
 
         $user->save();
 
@@ -98,7 +105,10 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
+
+        $this->authorize('destroy');
+
         $user->delete();
 
         Session::flash('message', "Successfully deleted user ID".$user->id." ".$user->firstname);

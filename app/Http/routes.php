@@ -14,6 +14,17 @@
 Route::get('/', 'HomeController@index');
 Route::auth();
 
+Route::get('/socialite/{provider}', ['as' => 'socialite.auth',
+        function ( $provider ) {
+            return \Socialite::driver( $provider )->redirect();}
+    ]
+);
+
+Route::get('/socialite/{provider}/callback', function ($provider) {
+    $user = \Socialite::driver($provider)->user();
+    dd($user);
+});
+
 Route::resource('users', 'UserController');
 Route::resource('books', 'BookController');
 

@@ -22,6 +22,7 @@ class LendController extends Controller
 
     public function create($book_id)
     {
+        $this->authorize('create');
         $readers = User::where('role', '=', 'reader')->select('id', 'firstname', 'lastname')->get();
         $book = Book::find($book_id);
 
@@ -30,7 +31,9 @@ class LendController extends Controller
 
     public function store(Request $request)
     {
-       $book = Book::find($request->book_id);
+        $this->authorize('store');
+
+        $book = Book::find($request->book_id);
 
         if (!$book->is_charged) {
 
@@ -60,6 +63,8 @@ class LendController extends Controller
     
     public function update(Request $request)
     {
+        $this->authorize('update');
+        
         $book_id = $request->book_id;
         $user_id = $request->user_id;
 

@@ -15,6 +15,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         'App\Model' => 'App\Policies\ModelPolicy',
         'App\Book' => 'App\Policies\BookPolicy',
+        'App\User' => 'App\Policies\UserPolicy',
     ];
 
     /**
@@ -27,6 +28,25 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies($gate);
 
-        //
+        $gate->define('create', function ($user){
+            return $user->role == 'admin';});
+
+        $gate->define('update', function ($user){
+            return $user->role == 'admin';});
+
+        $gate->define('edit', function ($user){
+            return $user->role == 'admin';});
+
+        $gate->define('store', function ($user){
+            return $user->role == 'admin';});
+
+        $gate->define('destroy', function ($user){
+            return $user->role == 'admin';});
+
+        //TODO id user == id Auth user for users/show
+        //$gate->define('show', function ($user){
+        //    return  $user->role == 'admin';});
+
+
     }
 }

@@ -33,11 +33,14 @@ class BookController extends Controller
 
     public function create()
     {
+        $this->authorize('create');
         return view('book/create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('store');
+
         $rules = ['genre'  => 'required|alpha',
                   'author' => 'required|alpha',
                   'title'  => 'required',
@@ -61,7 +64,7 @@ class BookController extends Controller
     public function show($id)
     {
         $user = null;
-        $book = Book::find($id);
+        $book = Book::findOrFail($id);
 
         $this->authorize('show', $book);
 
@@ -74,13 +77,16 @@ class BookController extends Controller
 
     public function edit($id)
     {
-        $book = Book::find($id);
+        $book = Book::findOrFail($id);
+        $this->authorize('edit');
         
         return view('book/edit',['book'=>$book]);
     }
 
     public function update(Request $request, $id)
     {
+        $this->authorize('update');
+
         $rules = ['genre'  => 'required|alpha',
                   'author' => 'required|alpha',
                   'title'  => 'required',
@@ -88,7 +94,7 @@ class BookController extends Controller
 
         $this->validate($request, $rules);
 
-        $book = Book::find($id);
+        $book = Book::findOrFail($id);
         $book->genre = $request->genre;
         $book->title = $request->title;
         $book->author = $request->author;
@@ -103,7 +109,10 @@ class BookController extends Controller
 
     public function destroy($id)
     {
-        $book = Book::find($id);
+        $this->authorize('destroy');
+        
+        $book = Book::findOrFail($id);
+
         $book->delete();
         
         Session::flash('message', 'Successfully deleted book ID'.$book->id." ".$book->title);

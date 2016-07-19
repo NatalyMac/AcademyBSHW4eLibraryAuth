@@ -35,4 +35,16 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'github' => [
+        'client_id' => 'c8e69a76a6de3b4a99ba',
+        'client_secret' => '15462872afcf45eb7527c815e024ea49b1422f53',
+        'redirect' => 'http://localhost/eLibraryAuth/public/index.php/socialite/github/callback',
+    ],
+
+
+    'facebook' => [
+        'client_id' => '1760230014262494',
+        'client_secret' => 'aa8b2ebf53ba3b60d04a7d90d381afc3',
+        'redirect' => 'http://localhost/eLibraryAuth/public/index.php/socialite/facebook/callback',
+    ],
 ];

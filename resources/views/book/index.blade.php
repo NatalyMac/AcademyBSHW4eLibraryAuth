@@ -51,7 +51,14 @@
 
                 @if (Auth::user()->role == 'admin')
                 <td> {{ $book->firstname}} {{ $book->lastname}}</td>
-                <td width="390">
+                @endif
+
+                @if (Auth::user()->role == 'reader')
+                    <td> {{ $book->created_at}}</td>
+                    <td> {{ $book->date_getin_fact}}</td>
+                @endif
+
+                 <td width="390">
                     <a class=" btn btn-small btn-primary" href="{{ URL::to('books/'.$book->id) }}">Show this book </a>
                     <a class=" btn btn-small btn-success" href="{{ URL::to('books/'.$book->id.'/edit') }}">Edit this book </a>
                     {!!  Form::open (['url'=>['books/'.$book->id], 'class'=>'pull-right'])  !!}
@@ -59,12 +66,7 @@
                     {!!  Form::submit('Delete this book',['class'=>'btn btn-warning']) !!}
                     {!!  Form::close() !!}
                  </td>
-                @endif
 
-                @if (Auth::user()->role == 'reader')
-                    <td> {{ $book->created_at}}</td>
-                    <td> {{ $book->date_getin_fact}}</td>
-                @endif
 {{--
                 @foreach($book->lends as $lend)
                     @if ($lend->date_getin_fact == null)

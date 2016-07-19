@@ -43,10 +43,5 @@ class AuthServiceProvider extends ServiceProvider
         $gate->define('destroy', function ($user){
             return $user->role == 'admin';});
 
-        //TODO id user == id Auth user for users/show
-        //$gate->define('show', function ($user){
-        //    return  $user->role == 'admin';});
-
-
     }
 }

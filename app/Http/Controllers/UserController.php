@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Session;
 
 use App\Repositories\UserRepository;
 use App\Http\Requests;
+use App\Http\Requests\{StoreUserRequest, UpdateUserRequest, EditUserRequest, ShowUserRequest};
 use App\User;
 
 
@@ -23,7 +24,6 @@ class UserController extends Controller
     {
         $this->middleware('auth');
         $this->users = $users;
-
     }
 
     /**
@@ -50,18 +50,8 @@ class UserController extends Controller
      * @param Request $request
      * @return mixed
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $this->authorize('store');
-
-        $rules = ['firstname' => 'required|alpha',
-                  'lastname'  => 'required|alpha',
-                  'email'     => 'required|email|unique:users',
-                  'password'  => 'required',
-                  'role'      => 'required'];
-
-        $this->validate($request, $rules);
-        
         $user = new User();
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
@@ -81,32 +71,21 @@ class UserController extends Controller
      * @param Request $request
      * @return mixed
      */
-    public function show($id, Request $request)
+    public function show(ShowUserRequest $request, $id)
     {
         $user = User::findOrFail($id);
-
-        if ($request->user()->id == $user->id or $request->user()->role == 'admin')
-            
             return view('user/show',['user'=>$user]);
-        else
-            abort(403);
+
     }
 
     /**
      * @param $id
      * @return mixed
      */
-    public function edit($id, Request $request)
+    public function edit(EditUserRequest $request,  $id)
     {
-      //  $this->authorize('edit');
-
         $user = User::findOrFail($id);
-
-        if ($request->user()->id == $user->id or $request->user()->role == 'admin')
-
             return view('user/edit',['user'=>$user]);
-        else
-            abort(403);
 
     }
 
@@ -115,31 +94,22 @@ class UserController extends Controller
      * @param $id
      * @return mixed
      */
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
-        $rules = ['firstname'  => 'required|alpha',
-                  'lastname'  => 'required|alpha',
-                   'role'     => 'required'];
-
-
         $user = User::findOrFail($id);
 
-        if ($request->user()->id == $user->id or $request->user()->role == 'admin') {
+        $user->firstname = $request->firstname;
+        $user->lastname = $request->lastname;
+        $user->email = $request->email;
 
-            $this->validate($request, $rules);
-
-            $user->firstname = $request->firstname;
-            $user->lastname = $request->lastname;
-            $user->email = $request->email;
+        if (\Auth::user()->role == 'admin')
             $user->role = $request->role;
 
-            $user->save();
+        $user->save();
 
-            Session::flash('message', "Successfully updated user ID" . $user->id . " "
+        Session::flash('message', "Successfully updated user ID" . $user->id . " "
                                                                    . $user->firstname);
-
             return (Redirect::to('users'));
-        } else  abort(403);
     }
 
     /**

@@ -13,11 +13,6 @@ use App\Lend;
 
 class LendController extends Controller
 {
-
-
-    /**
-     * LendController constructor.
-     */
     public function __construct()
     {
         $this->middleware('auth');
@@ -68,10 +63,8 @@ class LendController extends Controller
 
             return (Redirect::to('books'));
         }
-
     }
-
-
+    
     /**
      * @param Request $request
      * @return mixed
@@ -106,5 +99,4 @@ class LendController extends Controller
                     return Redirect::to('books');
 
     }
-
 }

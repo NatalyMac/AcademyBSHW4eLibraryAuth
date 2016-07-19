@@ -34,12 +34,14 @@
 
     </div>
 
+        @if (Auth::user()->role == 'admin')
     <div class ="form-group">
 
         {!!  Form::label('role', 'Role') !!}
-        {!!  Form::select('role', ['reader'=>'reader', 'worker'=>'worker', 'admin'=>'admin'], null)!!}
+        {!!  Form::select('role', ['reader'=>'reader', 'worker'=>'worker', 'admin'=>'admin'])!!}
 
     </div>
+        @endif
 
     {!!  Form::submit('Update',['class'=>'btn btn-primary']) !!}
 

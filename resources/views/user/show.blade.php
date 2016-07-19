@@ -1,9 +1,5 @@
 @extends('layouts/app')
 
-{{--@section('pagetitle')
-    Show User
-@stop--}}
-
 @section('content')
     <div class="container">
 

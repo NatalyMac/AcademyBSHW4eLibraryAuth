@@ -66,15 +66,6 @@
                     {!!  Form::submit('Delete this book',['class'=>'btn btn-warning']) !!}
                     {!!  Form::close() !!}
                  </td>
-
-{{--
-                @foreach($book->lends as $lend)
-                    @if ($lend->date_getin_fact == null)
-                         <td> {{$lend->user->firstname}} </td>
-                    @endif
-                @endforeach
---}}
-
             </tr>
         @endforeach
 

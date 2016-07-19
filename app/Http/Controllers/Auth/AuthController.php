@@ -80,7 +80,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Obtain the user information from GitHub.
+     * Obtain the user information from Oauth
      *
      * @return Response
      */

@@ -17,13 +17,12 @@ class UserPolicy
     }
 
     public function edit(User $user, User $id)
-    {   dd('uu');
+    {
         return ($user->isAdmin() or $user->isOwner($id));
     }
     
     public function update(User $user, User $id)
     {
-        dd('uu');
         return ($user->isAdmin() or $user->isOwner($id));
     }
     

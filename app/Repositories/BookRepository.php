@@ -15,7 +15,7 @@ class BookRepository
      */
     public function forUser(User $user)
     {
-        if ($user->role == 'reader')
+        if ($user->isReader())
             $books = DB::table('books')
                 ->leftJoin('lends', function ($join){
                     $join->on('books.id', '=', 'lends.book_id')->whereNull('lends.date_getin_fact');})
@@ -23,7 +23,7 @@ class BookRepository
                     'lends.date_getin_fact')
                 ->where('lends.user_id','=', $user->id);
 
-        if ($user->role == 'admin')
+        if ($user->isAdmin())
             $books = DB::table('books')
                 ->leftJoin('lends', function ($join){
                            $join->on('books.id', '=', 'lends.book_id')->whereNull('lends.date_getin_fact');})

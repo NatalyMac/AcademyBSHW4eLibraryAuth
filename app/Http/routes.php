@@ -15,20 +15,6 @@
 Route::get('/', 'HomeController@index');
 Route::auth();
 
-/*
-Route::get('/socialite/{provider}', ['as' => 'socialite.auth',
-        function ( $provider ) {
-            return \Socialite::driver( $provider )->redirect();}
-    ]
-);
-
-Route::get('/socialite/{provider}/callback', function ($provider) {
-    $user = \Socialite::driver($provider)->user();
-    dd($user);
-});
-*/
-
-
 Route::get('/auth/{provider}', 'Auth\AuthController@redirectToProvider');
 Route::get('/auth/{provider}/callback', 'Auth\AuthController@handleProviderCallback');
 

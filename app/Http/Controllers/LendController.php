@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\{Redirect, Session};
 
 use App\Http\Requests;
-use App\Book;
-use App\User;
-use App\Lend;
+use App\{Book, User, Lend};
+
 
 class LendController extends Controller
 {
@@ -24,8 +22,11 @@ class LendController extends Controller
      */
     public function create($book_id)
     {
-        $this->authorize('create');
-        $readers = User::where('role', '=', 'reader')->select('id', 'firstname', 'lastname')->get();
+        $lend = new Lend();
+
+        $this->authorize('create', $lend);
+
+        $readers = User::getReaders();
         $book = Book::find($book_id);
 
         return view('lend/create', ['book'=>$book, 'readers'=>$readers]);
@@ -37,8 +38,6 @@ class LendController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('store');
-
         $book = Book::find($request->book_id);
 
         if (!$book->is_charged) {
@@ -47,6 +46,8 @@ class LendController extends Controller
             $lend->user_id = $request->reader;
             $lend->book_id = $request->book_id;
             $lend->date_getin_plan = date('Y:m:d H:m:s', (time() + 60000));
+
+            $this->authorize('store', $lend);
 
             $lend->save();
 
@@ -71,19 +72,12 @@ class LendController extends Controller
      */
     public function update(Request $request)
     {
-        $this->authorize('update');
-        
-        $book_id = $request->book_id;
-        $user_id = $request->user_id;
+        $lend = Lend::getLend($request->book_id, $request->user_id);
 
-        $book = Book::find($book_id);
+        $this->authorize('update', $lend);
 
-        $lend = Lend::whereNull('date_getin_fact')
-            ->where('book_id', '=', $book_id)
-            ->where('user_id', '=', $user_id)->first();
-
+        $book = Book::find($request->book_id);
         $lend->date_getin_fact = date ('Y:m:d H:m:s', time());
-
         $book->is_charged = false;
 
         $lend->save();
@@ -94,7 +88,7 @@ class LendController extends Controller
         $path = $request->getPathInfo();
 
         if (strpos($path, 'books')<> 1)
-            return Redirect::to('users/'.$user_id);
+            return Redirect::to('users/'.$request->user_id);
                 else
                     return Redirect::to('books');
 

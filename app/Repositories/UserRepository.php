@@ -17,7 +17,7 @@ class UserRepository
     public function forUser(User $user)
     {
 
-        if ($user->role == 'reader')
+        if ($user->isReader())
             $users = DB::table('users')
                 ->leftJoin('lends', function ($join){
                     $join->on('users.id', '=', 'lends.user_id')->whereNull('lends.date_getin_fact');
@@ -25,7 +25,7 @@ class UserRepository
                 ->select(DB::raw('users.*, count(lends.book_id) as book_count'))
                 ->where('users.id','=', $user->id);
 
-        if ($user->role == 'admin')
+        if ($user->isAdmin())
             $users = DB::table('users')
                 ->leftJoin('lends', function ($join){
                     $join->on('users.id', '=', 'lends.user_id')->whereNull('lends.date_getin_fact');

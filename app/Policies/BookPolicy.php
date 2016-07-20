@@ -3,8 +3,8 @@
 namespace App\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\User;
-use App\Book;
+use Illuminate\Http\Request;
+use App\{Book, User};
 
 class BookPolicy
 {
@@ -12,14 +12,36 @@ class BookPolicy
 
     public function show(User $user, Book $book)
     {
+        if (!$book->isCharged())
+            return $user->isAdmin();
+        else
+            return $book->isChargedByUser($user) or $user->isAdmin();
+    }
 
-    if (!$book->lends()->where('book_id', '=', $book->id)->whereNull('date_getin_fact')->first())
+    public function edit(User $user, Book $book)
+    { 
+        return ($user->isAdmin());
+    }
 
-        return $user->role == 'admin';
+    public function update(User $user, Book $book)
+    {;
+        return ($user->isAdmin());
+    }
 
-    else return $user->id === $book->lends()->whereNull('date_getin_fact')->first()->user()->first()->id
-             or $user->role == 'admin';
+    public function create(User $user, Book $book)
+    {
+        return ($user->isAdmin());
+    }
 
+    public function store(User $user, Book $book)
+    {
+        return ($user->isAdmin());
     }
     
+    public function destroy(User $user, Book $book)
+    {
+       return ($user->isAdmin());
+    }
+
+
 }

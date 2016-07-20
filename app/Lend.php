@@ -15,4 +15,12 @@ class Lend extends Model
     {
         return $this->belongsTo('App\Book');
     }
+
+    public static function getLend($book_id, $user_id)
+    {
+        return Lend::whereNull('date_getin_fact')
+            ->where('book_id', '=', $book_id)
+            ->where('user_id', '=', $user_id)->first();
+    }
+
 }

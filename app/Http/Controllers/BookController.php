@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\{Redirect, Session};
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Repositories\BookRepository;
 use App\Book;
-
 
 
 class BookController extends Controller
@@ -43,7 +41,9 @@ class BookController extends Controller
      */
     public function create()
     {
-        $this->authorize('create');
+        $book = new Book();
+        $this->authorize('create', $book);
+
         return view('book/create');
     }
 
@@ -53,8 +53,6 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        $this->authorize('store');
-
         $rules = ['genre'  => 'required|alpha',
                   'author' => 'required|alpha',
                   'title'  => 'required',
@@ -67,6 +65,8 @@ class BookController extends Controller
         $book->title = $request->title;
         $book->author = $request->author;
         $book->year = $request->year;
+
+        $this->authorize('store', $book);
 
         $book->save();
 
@@ -86,9 +86,9 @@ class BookController extends Controller
 
         $this->authorize('show', $book);
 
-        if ($book->lends()->whereNull('date_getin_fact')->first()) {
-            $user = $book->lends()->whereNull('date_getin_fact')->first()->user()->first();
-        }
+        if ($book->isCharged())
+            $user = $book->getBookHolder();
+
 
         return view('book/show',['book'=>$book, 'user'=>$user ]);
     }
@@ -96,13 +96,14 @@ class BookController extends Controller
     /**
      * @param $id
      * @return mixed
+     * @return mixed
      */
     public function edit($id)
     {
-        $this->authorize('edit');
-
         $book = Book::findOrFail($id);
-        
+
+        $this->authorize('edit', $book);
+
         return view('book/edit',['book'=>$book]);
     }
 
@@ -113,7 +114,9 @@ class BookController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->authorize('update');
+        $book = Book::findOrFail($id);
+
+        $this->authorize('update',$book);
 
         $rules = ['genre'  => 'required|alpha',
                   'author' => 'required|alpha',
@@ -122,7 +125,6 @@ class BookController extends Controller
 
         $this->validate($request, $rules);
 
-        $book = Book::findOrFail($id);
         $book->genre = $request->genre;
         $book->title = $request->title;
         $book->author = $request->author;
@@ -141,9 +143,9 @@ class BookController extends Controller
      */
     public function destroy($id)
     {
-        $this->authorize('destroy');
-        
         $book = Book::findOrFail($id);
+
+        $this->authorize('destroy', $book);
 
         $book->delete();
         

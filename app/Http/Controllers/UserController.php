@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\{Redirect, Session};
 
 use App\Repositories\UserRepository;
 use App\Http\Requests;
-use App\Http\Requests\{StoreUserRequest, UpdateUserRequest, EditUserRequest, ShowUserRequest};
 use App\User;
 
 
@@ -41,7 +39,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        $this->authorize('create');
+        $this->authorize('create', \Auth::user());
 
         return view('user/create');
     }
@@ -50,8 +48,18 @@ class UserController extends Controller
      * @param Request $request
      * @return mixed
      */
-    public function store(StoreUserRequest $request)
+    public function store(Request $request)
     {
+        $this->authorize('store', \Auth::user());
+        
+        $rules = ['firstname' => 'required|alpha',
+            'lastname'  => 'required|alpha',
+            'email'     => 'required|email|unique:users',
+            'password'  => 'required',
+            'role'      => 'required'];
+        
+        $this->validate($request, $rules);
+       
         $user = new User();
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
@@ -71,22 +79,28 @@ class UserController extends Controller
      * @param Request $request
      * @return mixed
      */
-    public function show(ShowUserRequest $request, $id)
+   
+    public function show($id)
     {
         $user = User::findOrFail($id);
-            return view('user/show',['user'=>$user]);
-
+    
+        $this->authorize('show', $user, $id);
+    
+           return view('user/show',['user'=>$user]);
     }
-
+    
     /**
      * @param $id
      * @return mixed
      */
-    public function edit(EditUserRequest $request,  $id)
+
+    public function edit($id)
     {
         $user = User::findOrFail($id);
-            return view('user/edit',['user'=>$user]);
 
+        $this->authorize('edit', $user, $id);
+
+            return view('user/edit',['user'=>$user]);
     }
 
     /**
@@ -94,15 +108,23 @@ class UserController extends Controller
      * @param $id
      * @return mixed
      */
-    public function update(UpdateUserRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+
+        $this->authorize('update', $user, $id);
+
+        $rules = ['firstname' => 'required|alpha',
+                  'lastname'  => 'required|alpha',
+                  'email'     => 'required|email'];
+
+        $this->validate($request, $rules);
 
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
         $user->email = $request->email;
 
-        if (\Auth::user()->role == 'admin')
+        if (\Auth::user()->isAdmin())
             $user->role = $request->role;
 
         $user->save();
@@ -116,11 +138,12 @@ class UserController extends Controller
      * @param $id
      * @return mixed
      */
+    
     public function destroy($id)
     {
-        $this->authorize('destroy');
-
         $user = User::findOrFail($id);
+
+        $this->authorize('destroy', \Auth::user());
 
         $user->delete();
 

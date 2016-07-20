@@ -5,6 +5,9 @@ namespace App\Providers;
 use Illuminate\Contracts\Auth\Access\Gate as GateContract;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
+use App\{Book,User, Lend};
+use App\Policies\{BookPolicy, UserPolicy, LendPolicy};
+
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -14,8 +17,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         'App\Model' => 'App\Policies\ModelPolicy',
-        'App\Book' => 'App\Policies\BookPolicy',
-        'App\User' => 'App\Policies\UserPolicy',
+        Book::class => BookPolicy::class,
+        User::class => UserPolicy::class,
+        Lend::class => LendPolicy::class,
     ];
 
     /**
@@ -27,21 +31,6 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(GateContract $gate)
     {
         $this->registerPolicies($gate);
-
-        $gate->define('create', function ($user){
-            return $user->role == 'admin';});
-
-        $gate->define('update', function ($user){
-            return $user->role == 'admin';});
-
-        $gate->define('edit', function ($user){
-            return $user->role == 'admin';});
-
-        $gate->define('store', function ($user){
-            return $user->role == 'admin';});
-
-        $gate->define('destroy', function ($user){
-            return $user->role == 'admin';});
 
     }
 }
